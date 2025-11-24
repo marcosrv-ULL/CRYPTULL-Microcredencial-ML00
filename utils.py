@@ -104,13 +104,13 @@ def wizard_navigation(total_pages, current_page_key):
     
     with col1:
         if curr > 0:
-            if st.button("⬅️ Anterior", use_container_width=True):
+            if st.button("«", use_container_width=True):
                 st.session_state[current_page_key] -= 1
                 st.rerun()
                 
     with col3:
         if curr < total_pages - 1:
-            if st.button("Siguiente ➡️", use_container_width=True):
+            if st.button("»", use_container_width=True):
                 st.session_state[current_page_key] += 1
                 st.rerun()
     

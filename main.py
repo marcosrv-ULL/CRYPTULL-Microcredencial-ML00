@@ -27,7 +27,7 @@ with st.sidebar:
     selection_label = st.radio("Navegación", list(structure.keys()))
     
     st.markdown("---")
-    #st.info("Datos cargados: **Tenerife Real Estate**")
+    st.info("https://drive.google.com/drive/folders/1Qibrfn0YCSlb6qo2t30A1Qz9CKDcMTNo?usp=sharing")
 
 # Carga dinámica
 module_name = structure[selection_label]
