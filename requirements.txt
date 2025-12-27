@@ -1,1 +1,7 @@
 streamlit
+manim
+scikit-learn
+pandas
+numpy
+matplotlib
+seaborn
