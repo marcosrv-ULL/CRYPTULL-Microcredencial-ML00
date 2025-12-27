@@ -1,39 +1,40 @@
 import streamlit as st
-import importlib
 from utils import load_css
 
-# Configuración inicial
-st.set_page_config(page_title="Microcredencial ML - ULL", page_icon="🏛️", layout="wide")
+# --- CONFIGURACIÓN GLOBAL ---
+# st.set_page_config debe ser lo primero, aunque st.Page gestionará los títulos individuales
+st.set_page_config(page_title="Microcredencial ML - ULL", layout="wide")
 
-# Cargar estilos (opcional, si tienes css personalizado)
-# load_css() 
+# Cargar estilos globales
+load_css() 
 
-# --- SIDEBAR DE NAVEGACIÓN ---
-with st.sidebar:
-    st.header("Curso de ML")
-    st.markdown("---")
-    
-    # Diccionario: "Nombre en Sidebar": "nombre_archivo_en_carpeta_chapters"
-    structure = {
-        "Módulo 0: Fundamentos": "intro",
-        "Módulo 1: Análisis (EDA)": "eda",
+# --- DEFINICIÓN DE LAS PÁGINAS ---
+# El primer argumento es la ruta al archivo.
+# El título es lo que aparecerá en la sidebar.
+
+pg_intro = st.Page("chapters/intro.py", title="Intro", url_path="intro")
+pg_eda = st.Page("chapters/eda.py", title="Estadistica Básica", url_path="eda")
+
+# Si tienes más módulos, añádelos aquí:
+# pg_model = st.Page("chapters/model.py", title="Aprendizaje Supervisado", icon="🤖")
+
+# --- DEFINICIÓN DE LA NAVEGACIÓN ---
+# Aquí agrupamos las páginas por secciones (Módulos)
+pg = st.navigation(
+    {
+        "": [pg_intro],
+        "Fundamentos": [pg_eda],
+        # "Módulo 2": [pg_model],
     }
-    
-    selection_label = st.radio("Navegación", list(structure.keys()))
-    
+)
+
+# --- ELEMENTOS COMUNES (LOGO Y SIDEBAR) ---
+# Todo lo que pongas aquí se ejecutará en CADA página.
+# st.logo es la nueva forma nativa de poner el logo arriba a la izquierda
+
+with st.sidebar:
     st.markdown("---")
+    st.caption("Microcredencial ML - CryptULL")
 
-# --- CARGA DINÁMICA DE CAPÍTULOS ---
-module_name = structure[selection_label]
-
-try:
-    # Esto busca el archivo en la carpeta chapters/nombre.py
-    chapter_module = importlib.import_module(f"chapters.{module_name}")
-    
-    # Ejecutamos la función run() que debe existir en cada capítulo
-    chapter_module.run()
-    
-except ModuleNotFoundError:
-    st.error(f"No se encontró el archivo `chapters/{module_name}.py`")
-except Exception as e:
-    st.error(f"Error al cargar el módulo: {e}")
+# --- EJECUTAR EL ENRUTADOR ---
+pg.run()
