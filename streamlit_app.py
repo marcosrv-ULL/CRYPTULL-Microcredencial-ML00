@@ -33,7 +33,6 @@ pg = st.navigation(
 # st.logo es la nueva forma nativa de poner el logo arriba a la izquierda
 
 with st.sidebar:
-    st.markdown("---")
     st.caption("Microcredencial ML - CryptULL")
 
 # --- EJECUTAR EL ENRUTADOR ---

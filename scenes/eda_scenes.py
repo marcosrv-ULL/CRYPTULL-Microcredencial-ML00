@@ -2,44 +2,177 @@ from manim import *
 import numpy as np
 
 # --- ACTO 1: LA VARIABLE (Sin cambios, incluido por contexto) ---
+from manim import *
+import numpy as np
+
 class Acto1_Variable(Scene):
     def construct(self):
-        # 1. Lienzo Vacío
-        ax = Axes(x_range=[0, 10, 1], y_range=[0, 2], axis_config={"include_numbers": True}, y_length=2)
-        titulo = Text("La Variable: El Contenedor", font_size=36).to_edge(UP)
+        # --- PARTE 1: DEFINICIÓN Y TABLA ---
         
-        self.play(Create(ax), Write(titulo))
+        # 1. Título y Definición
+        titulo_p1 = Text("¿Qué es una Variable?", font_size=48).to_edge(UP)
+        definicion = Text(
+            "Es una característica medible que cambia\n(fluctúa) entre diferentes sujetos.",
+            font_size=32, t2c={"cambia": YELLOW}
+        )
         
-        # 2. La Caída (Continuo)
-        val = 5.2
-        dot = Dot(ax.c2p(val, 0), color=YELLOW)
-        dot.move_to(ax.c2p(val, 2)) # Empezar arriba
-        label = Text(f"Valor = {val}", font_size=24).next_to(dot, UP)
+        self.play(Write(titulo_p1))
+        self.play(FadeIn(definicion))
+        self.wait(3) # Pausa para leer
+        self.play(FadeOut(definicion))
+
+        # 2. La Tabla de Datos (DataFrame)
+        # Creamos una tabla manual simple
+        header = VGroup(
+            Text("ID", font_size=24), 
+            Text("Peso (X1)", font_size=24, color=BLUE), 
+            Text("Altura (X2)", font_size=24, color=BLUE), 
+            Text("Especie (Y)", font_size=24, color=RED)
+        ).arrange(RIGHT, buff=1)
         
-        self.play(dot.animate.move_to(ax.c2p(val, 0)), run_time=1, rate_func=linear)
-        self.play(Write(label))
+        row1 = VGroup(
+            Text("001", font_size=24), 
+            Text("15.2", font_size=24), 
+            Text("5.2", font_size=24), 
+            Text("A", font_size=24)
+        ).arrange(RIGHT, buff=1).next_to(header, DOWN, buff=0.5)
+        
+        # Alineamos columnas manualmente para que quede bonito
+        for i in range(4):
+            row1[i].match_x(header[i])
+
+        tabla_grupo = VGroup(header, row1).move_to(ORIGIN)
+        rect_tabla = SurroundingRectangle(tabla_grupo, color=WHITE, buff=0.3)
+        
+        self.play(Create(rect_tabla), Write(header), Write(row1))
         self.wait(1)
+
+        # 3. Explicación X vs Y
+        txt_features = Text("Variables Independientes (X)\nCaracterísticas", font_size=24, color=BLUE)
+        txt_features.next_to(rect_tabla, UP).shift(LEFT*2)
         
-        # 3. Transformación a Discreto (Buckets)
-        self.play(FadeOut(label), FadeOut(dot))
+        txt_target = Text("Variable Objetivo (Y)\nLo que predecimos", font_size=24, color=RED)
+        txt_target.next_to(rect_tabla, UP).shift(RIGHT*2)
+
+        # Señalar X
+        frame_x = SurroundingRectangle(VGroup(header[1], row1[2]), color=BLUE)
+        self.play(Create(frame_x), FadeIn(txt_features))
+        self.wait(2)
+
+        # Señalar Y
+        frame_y = SurroundingRectangle(VGroup(header[3], row1[3]), color=RED)
+        self.play(ReplacementTransform(frame_x, frame_y), FadeOut(txt_features), FadeIn(txt_target))
+        self.wait(2)
+
+        # Limpiar escena para pasar a la animación física
+        # Nos quedamos con el valor "5.2" de la altura
+        valor_destacado = row1[2].copy() # El valor 5.2
+        self.play(
+            FadeOut(header), FadeOut(row1), FadeOut(rect_tabla), 
+            FadeOut(frame_y), FadeOut(txt_target), FadeOut(titulo_p1),
+            valor_destacado.animate.move_to(ORIGIN).scale(1.5)
+        )
+        self.wait(1)
+
+        # --- PARTE 2: VARIABLE CONTINUA ---
         
+        # Configuración ejes
+        ax = Axes(x_range=[0, 10, 1], y_range=[0, 2], axis_config={"include_numbers": True}, y_length=2)
+        titulo_p2 = Text("1. Variable Continua", font_size=36, color=YELLOW).to_edge(UP)
+        subtitulo_p2 = Text("Puede tomar infinitos valores (decimales)", font_size=24).next_to(titulo_p2, DOWN)
+
+        self.play(
+            Transform(valor_destacado, Dot(ax.c2p(5.2, 2), color=YELLOW)), # Transformamos el número en punto
+            Create(ax),
+            Write(titulo_p2)
+        )
+        self.play(Write(subtitulo_p2))
+        
+        # Referencia al objeto dot
+        dot = valor_destacado 
+        
+        # Animación de caída precisa
+        self.play(dot.animate.move_to(ax.c2p(5.2, 0)), run_time=1.5, rate_func=rate_functions.ease_in_elastic)
+        
+        label_val = Text("Valor exacto: 5.2", font_size=20).next_to(dot, UP)
+        self.play(Write(label_val))
+        self.wait(2)
+        
+        # Demostrar el concepto de infinito: Moverse suavemente
+        self.play(
+            dot.animate.shift(RIGHT * 0.5),
+            run_time=1
+        )
+        label_val2 = Text("5.721...", font_size=20).next_to(dot, UP)
+        self.play(Transform(label_val, label_val2))
+        self.wait(2)
+
+        # --- PARTE 3: VARIABLE DISCRETA ---
+        
+        self.play(FadeOut(label_val), FadeOut(dot), FadeOut(subtitulo_p2))
+        
+        titulo_p3 = Text("2. Variable Discreta", font_size=36, color=BLUE).to_edge(UP)
+        subtitulo_p3 = Text("El valor debe 'encajar' en una categoría o entero", font_size=24).next_to(titulo_p3, DOWN)
+        
+        self.play(Transform(titulo_p2, titulo_p3), Write(subtitulo_p3))
+
         rects = VGroup()
+        labels_cajas = VGroup()
+        
+        # CAMBIO AQUÍ: Centramos las cajas en el valor entero
         for i in range(10):
-            rect = Rectangle(height=1, width=ax.x_axis.unit_size, color=BLUE)
-            rect.move_to(ax.c2p(i + 0.5, 0.5))
+            # Caja
+            rect = Rectangle(height=1, width=ax.x_axis.unit_size, color=BLUE, fill_opacity=0.2)
+            
+            # ANTES: ax.c2p(i + 0.5, 0.5) -> Se dibujaba entre i e i+1
+            # AHORA: ax.c2p(i, 0.5)       -> Se dibuja centrada en i
+            rect.move_to(ax.c2p(i, 0.5))
+            
             rects.add(rect)
             
-        texto_discreto = Text("Variable Discreta (Cajas)", font_size=24, color=BLUE).next_to(rects, UP)
+            # Etiqueta de la caja (bucket)
+            lbl = Text(str(i), font_size=16).move_to(rect.get_center())
+            labels_cajas.add(lbl)
+            
+        texto_contenedor = Text("Contenedores (Buckets)", font_size=24, color=BLUE).next_to(rects, UP)
         
-        self.play(Create(rects), FadeIn(texto_discreto))
+        self.play(Create(rects), FadeIn(labels_cajas), FadeIn(texto_contenedor))
+        self.wait(1)
+
+        # Animación: Intento fallido y corrección
+        # Ahora 5.5 es EXACTAMENTE el borde entre la caja 5 y la caja 6
+        # (Caja 5 va de 4.5 a 5.5 / Caja 6 va de 5.5 a 6.5)
+        # ... (Código previo de las cajas) ...
+
+        # Animación: El dato intenta ser continuo pero es forzado a ser discreto
         
-        # Bola intentando caer en medio y resbalando
-        dot_d = Dot(ax.c2p(5.5, 2), color=RED) # Cae en 5.5
-        self.play(FadeIn(dot_d))
-        self.play(dot_d.animate.move_to(ax.c2p(5.5, 1))) # Cae al borde
-        self.play(dot_d.animate.move_to(ax.c2p(6.0, 0.5))) # Resbala al centro del bucket 6
+        # 1. Aparición e incertidumbre
+        dot_d = Dot(ax.c2p(5.5, 2), color=RED)
+        lbl_intento = Text("¿Valor 5.5?", font_size=20, color=RED).next_to(dot_d, UP)
         
-        self.wait(2)
+        self.play(FadeIn(dot_d), Write(lbl_intento))
+        
+        # 2. Cae justo en la frontera (la grieta entre 5 y 6)
+        self.play(dot_d.animate.move_to(ax.c2p(5.5, 1))) 
+        self.wait(0.5)
+
+        # 3. EXPLICACIÓN DE LA REGLA (Paso nuevo)
+        # Transformamos la pregunta en una afirmación de la regla
+        lbl_regla = Text("Frontera: Redondeamos arriba", font_size=18, color=ORANGE).next_to(texto_contenedor, UP)
+        
+        self.play(ReplacementTransform(lbl_intento, lbl_regla))
+        self.wait(1.5) # Pausa para que lean la regla
+
+        # 4. Resbala al centro de la caja 6
+        lbl_final = Text("Categoría/entero 6", font_size=20, color=YELLOW).next_to(rects[6], UP)
+        
+        self.play(
+            dot_d.animate.move_to(rects[6].get_center()), # Se mueve físicamente al centro
+            FadeOut(lbl_regla),                           # Desaparece la regla
+            Transform(texto_contenedor, lbl_final)        # Cambia el título general por la etiqueta final
+        )
+        
+        self.wait(3)
 
 # ==========================================
 # --- ACTO 2: LA DISTRIBUCIÓN (CORREGIDO) ---
