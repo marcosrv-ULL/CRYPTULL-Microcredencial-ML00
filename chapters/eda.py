@@ -52,21 +52,35 @@ ACTOS = [
         "clase": "Acto2_Distribucion",
         "titulo": "Acto 2: La Distribución",
         "desc": textwrap.dedent("""
-            # Acto 2: La Distribución (Del Caos al Orden)
+            # Acto 2: La Anatomía de la Distribución
             
-            Lo fascinante de la estadística es cómo el comportamiento individual es impredecible, pero el comportamiento colectivo es matemáticamente perfecto.
+            A menudo usamos "Variable Aleatoria" y "Distribución" como sinónimos, pero son etapas distintas de una misma historia. Este vídeo desglosa el proceso paso a paso.
 
-            ### 1. La Lluvia de Datos
-            En la animación hemos simulado una **Máquina de Galton**. 
-            * Cada punto cae de forma aleatoria. No podemos saber dónde aterrizará el próximo punto amarillo.
-            * Sin embargo, cuando caen 200 puntos, **se apilan formando una silueta reconocible**.
+            ### 1. El Mapa Invisible (La 'Probability Density Function')
+            Antes de que caiga el primer dato, ya existe una **Función de Densidad de Probabilidad** (esa curva azul fantasma).
+            * No es el dato en sí, es el "molde".
+            * **La Regla:** Donde la curva es alta, la "gravedad" es más fuerte. Es mucho más probable que los datos aterricen ahí.
 
-            ### 2. La Función de Densidad
-            Esa silueta suave que dibujamos sobre las bolas apiladas es la **Distribución**.
-            * Nos dice la **probabilidad** de encontrar un dato en esa zona.
-            * En la naturaleza, muchas variables (altura, errores de medición, notas de examen) tienden a acumularse en el centro y descender hacia los lados.
-            
-            > **Concepto Clave:** A esta forma de campana perfecta la llamamos **Distribución Normal** o Gaussiana. Es la "forma por defecto" del universo para muchos fenómenos.
+            ### 2. Variable Aleatoria ($X$): El "Cursor"
+            Fíjate en el triángulo rojo inquieto. Eso es la Variable Aleatoria.
+            * **No es un número:** Es una función, un proceso. Es el acto de tirar el dado o medir a una persona.
+            * **La Incertidumbre:** Cada vez que ejecutamos $X$, el cursor busca un valor. La mayoría de las veces acabará en el centro (zona alta de la curva), pero de vez en cuando, el azar lo llevará a los extremos (eventos raros).
+
+            ### 3. El Milagro Estadístico (La Acumulación)
+            Bueno no es un milagro pero aquí ocurre la magia. Un solo punto es impredecible, caos, pero **800 puntos son perfectamente predecibles**, orden.
+            * Al apilarse, las bolas amarillas reconstruyen físicamente la curva verde teórica.
+            * Esto se conoce como la **Ley de los Grandes Números**: el comportamiento colectivo revela la verdad oculta que el individuo no puede mostrar.
+
+            ---
+
+            ### 4. El Zoológico de Distribuciones
+            NO todo es una camapana de Gauss la forma de la curva depende del problema:
+
+            | Distribución | Forma | ¿Por qué tiene esa forma? |
+            | :--- | :--- | :--- |
+            | **Uniforme** | Rectangular | **Justicia ciega.** El azar no tiene favoritos. Todos los valores tienen exactamente la misma probabilidad (ej. un dado perfecto). |
+            | **Exponencial** | Tobogán | **Fatiga o Espera.** Es muy probable que el evento ocurra pronto (pico alto al inicio), y cada vez más difícil que tarde mucho (cola larga). Típico en tiempos de espera o decaimiento radiactivo. |
+            | **Bimodal** | Dos Jorobas | **Mezcla oculta.** Si ves esto, tus datos gritan: "¡Aquí hay dos grupos distintos!". Por ejemplo, si mezclas alturas de jugadores de baloncesto y gimnastas en la misma gráfica. |
         """)
     },
     {
@@ -221,10 +235,10 @@ st.caption(f"Diapositiva {idx + 1} de {len(ACTOS)}")
 c1, c2, c3 = st.columns([1, 4, 1])
 
 with c1:
-    st.button("⬅️ Anterior", on_click=prev_slide, disabled=(idx == 0))
+    st.button("◄", on_click=prev_slide, disabled=(idx == 0))
     
 with c3:
-    st.button("Siguiente ➡️", on_click=next_slide, disabled=(idx == len(ACTOS) - 1))
+    st.button("►", on_click=next_slide, disabled=(idx == len(ACTOS) - 1))
 
 # --- HACK PARA TECLAS DE FLECHA ---
 components.html("""

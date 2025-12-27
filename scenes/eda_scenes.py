@@ -177,69 +177,279 @@ class Acto1_Variable(Scene):
 # ==========================================
 # --- ACTO 2: LA DISTRIBUCIÓN (CORREGIDO) ---
 # ==========================================
+
 class Acto2_Distribucion(Scene):
     def construct(self):
-        # Aumentamos un poco el rango Y para dejar espacio a la pila
-        ax = Axes(x_range=[-4, 4], y_range=[0, 1.5], y_length=4) 
-        titulo = Text("Del Caos al Orden (Acumulación)", font_size=36).to_edge(UP)
-        self.play(Create(ax), Write(titulo))
+        # --- CONFIGURACIÓN ESCENA ---
+        # Eje Y reducido [0, 1] para maximizar altura visual
+        ax = Axes(x_range=[-5, 5], y_range=[0, 1], y_length=5, axis_config={"include_tip": False})
         
-        # Configuración de las bolas
-        num_dots = 200  # Más bolas para ver mejor la forma
+        # Factor de escala visual
+        VISUAL_SCALE = 2.0 
+        def normal_pdf(x):
+            return (np.exp(-x**2/2) / np.sqrt(2*np.pi)) * VISUAL_SCALE
+
+        # ==========================================
+        # 1. FUNCIÓN DE DENSIDAD (EL MAPA)
+        # ==========================================
+        
+        # A. DEFINICIÓN TEXTUAL
+        titulo_1 = Text("1. Función de Densidad", font_size=36).to_edge(UP)
+        def_1 = Text(
+            "Es el 'mapa' teórico. Nos dice qué zonas\nson más probables antes de tener datos.",
+            font_size=24, t2c={"mapa": BLUE, "probables": YELLOW}
+        ).next_to(titulo_1, DOWN)
+        
+        self.play(Write(titulo_1))
+        self.play(FadeIn(def_1))
+        self.wait(3)
+        
+        # B. VISUALIZACIÓN
+        self.play(FadeOut(def_1)) 
+        
+        subtitulo_visual_1 = Text("Donde la curva es alta, hay más probabilidad.", font_size=20, color=BLUE).next_to(titulo_1, DOWN)
+        
+        ghost_curve = ax.plot(lambda x: normal_pdf(x), color=BLUE, stroke_opacity=0.6)
+        area = ax.get_area(ghost_curve, color=BLUE, opacity=0.1)
+        
+        self.play(Create(ax), FadeIn(subtitulo_visual_1))
+        self.play(Create(ghost_curve), FadeIn(area))
+        self.wait(1)
+
+
+        # ==========================================
+        # 2. VARIABLE ALEATORIA (EL PROCESO)
+        # ==========================================
+
+        # A. DEFINICIÓN TEXTUAL
+        # Usamos FadeOut/FadeIn en lugar de Transform para evitar errores gráficos
+        self.play(FadeOut(titulo_1), FadeOut(subtitulo_visual_1))
+
+        titulo_2 = Text("2. Variable Aleatoria (X)", font_size=36).to_edge(UP)
+        def_2 = Text(
+            "No es un número fijo, es un PROCESO.\nEs el acto de 'tirar el dado' y ver qué sale.",
+            font_size=24, t2c={"PROCESO": RED, "ver qué sale": YELLOW}
+        ).next_to(titulo_2, DOWN)
+
+        self.play(FadeIn(titulo_2), FadeIn(def_2))
+        self.wait(3)
+
+        # B. VISUALIZACIÓN (EL CURSOR)
+        self.play(FadeOut(def_2))
+        
+        subtitulo_visual_2 = Text("Buscando un valor...", font_size=20, color=RED).next_to(titulo_2, DOWN)
+        self.play(FadeIn(subtitulo_visual_2))
+
+        # --- ANIMACIÓN DEL CURSOR ---
+        cursor = Triangle(color=RED, fill_opacity=1).scale(0.2).rotate(PI)
+        cursor_label = Text("X", color=RED, font_size=24).next_to(cursor, UP)
+        cursor_group = VGroup(cursor, cursor_label)
+        
+        cursor_group.move_to(ax.c2p(0, 0.1))
+        self.play(FadeIn(cursor_group))
+
+        # Simulación 1: Centro
+        self.play(cursor_group.animate.move_to(ax.c2p(-2, 0.1)), rate_func=linear, run_time=0.3)
+        self.play(cursor_group.animate.move_to(ax.c2p(2, 0.1)), rate_func=linear, run_time=0.3)
+        self.play(cursor_group.animate.move_to(ax.c2p(0.2, 0.1)), rate_func=rate_functions.ease_out_elastic, run_time=1)
+        
+        linea_prob = DashedLine(ax.c2p(0.2, 0), ax.c2p(0.2, normal_pdf(0.2)), color=YELLOW)
+        txt_val = Text("¡Probable!", font_size=18, color=YELLOW).next_to(linea_prob, UP)
+        
+        self.play(Create(linea_prob), Write(txt_val))
+        self.wait(1)
+        self.play(FadeOut(linea_prob), FadeOut(txt_val))
+
+        # Simulación 2: Extremo
+        self.play(cursor_group.animate.move_to(ax.c2p(-3, 0.1)), rate_func=linear, run_time=0.5)
+        self.play(cursor_group.animate.move_to(ax.c2p(-1.8, 0.1)), rate_func=rate_functions.ease_out_bounce, run_time=1)
+        
+        linea_prob_2 = DashedLine(ax.c2p(-1.8, 0), ax.c2p(-1.8, normal_pdf(-1.8)), color=YELLOW)
+        txt_val_2 = Text("¡Raro!", font_size=18, color=YELLOW).next_to(linea_prob_2, UP)
+
+        self.play(Create(linea_prob_2), Write(txt_val_2))
+        self.wait(0.5)
+        
+        # Limpieza antes de la fase 3
+        self.play(
+            FadeOut(linea_prob_2), 
+            FadeOut(txt_val_2), 
+            FadeOut(cursor_group), 
+            FadeOut(subtitulo_visual_2),
+            FadeOut(titulo_2),
+            FadeOut(ghost_curve),
+            FadeOut(area)
+        )
+        
+
+        # ==========================================
+        # 3. DISTRIBUCIÓN (LA ACUMULACIÓN)
+        # ==========================================
+
+        titulo_3 = Text("3. La Máquina de Galton", font_size=36).to_edge(UP)
+        subtitulo_3 = Text("Si repetimos el proceso mil veces, emerge la forma.", font_size=20, color=GREEN).next_to(titulo_3, DOWN)
+        
+        self.play(FadeIn(titulo_3), FadeIn(subtitulo_3))
+
+        # Configuración de pilas
+        num_dots = 850  # Cantidad de puntos
         dot_radius = 0.05
-        # Espaciado horizontal entre columnas (un poco más que el diámetro)
-        col_spacing = dot_radius * 2.2 
-
-        # Diccionario para controlar la altura de cada columna
-        # clave: posición X ajustada, valor: contador de bolas en esa columna
+        col_spacing = dot_radius * 2.1 
         column_heights = {}
-
-        dots = VGroup()
+        dots_group = VGroup()
         animations = []
 
-        # Generación de la lluvia de datos
         for _ in range(num_dots):
-            # 1. Generar X aleatoria
             raw_x = np.random.normal(0, 1)
-
-            # 2. "Ajustar" la X a la columna más cercana para que se apilen rectos
             snapped_x = round(raw_x / col_spacing) * col_spacing
-
-            # 3. Obtener la altura actual de esta columna
+            
             count = column_heights.get(snapped_x, 0)
             column_heights[snapped_x] = count + 1
+            
+            # EL PUNTO NACE ARRIBA
+            y_start = 1.0 
+            start_point = ax.c2p(raw_x, y_start)
+            
+            d = Dot(point=start_point, color=YELLOW, radius=dot_radius)
+            dots_group.add(d)
 
-            # 4. Crear la bola arriba (usamos raw_x para que la caída parezca natural)
-            start_point = ax.c2p(raw_x, 1.5) 
-            d = Dot(point=start_point, color=YELLOW, radius=dot_radius, fill_opacity=0.8)
-            dots.add(d)
-
-            # 5. Calcular el punto de aterrizaje físico
-            # Punto base en el suelo (eje X) en la posición ajustada
+            # ATERRIZAJE APILADO
             base_point = ax.c2p(snapped_x, 0)
-            
-            # Desplazamiento vertical físico basado en cuántas bolas hay debajo.
-            # (count * 2 + 1) * radius coloca el centro de la bola a la altura correcta.
-            # Multiplicamos por 1.05 para dejar un pequeño hueco visual entre bolas.
-            vertical_offset = UP * (count * 2 + 1) * dot_radius * 1.05
-            
+            vertical_offset = UP * (count * 2 + 1) * dot_radius * 0.95 
             final_point = base_point + vertical_offset
 
-            # Crear la animación de caída hacia el punto final calculado
-            animations.append(d.animate.move_to(final_point))
+            animations.append(
+                Succession(
+                    FadeIn(d, run_time=0.05),
+                    d.animate.move_to(final_point).set_rate_func(linear)
+                )
+            )
         
-        # Ejecutar la caída aleatoria con retraso (lag)
-        self.play(LaggedStart(*animations, lag_ratio=0.02, run_time=6, rate_func=linear))
+        self.play(LaggedStart(*animations, lag_ratio=0.005, run_time=6))
         self.wait(1)
+
+        # CREAR LA CURVA SÓLIDA VERDE (IMPORTANTE: Esto faltaba antes)
+        solid_curve = ax.plot(lambda x: normal_pdf(x), color=GREEN)
         
-        # La forma emergente (Curva teórica)
-        # Ajustamos la altura de la curva para que coincida visualmente con la pila
-        scale_factor = 0.8 # Factor de escala visual para la curva
-        curve = ax.plot(lambda x: scale_factor * np.exp(-x**2/2) / np.sqrt(2*np.pi), color=BLUE)
+        # Transición limpia: Los puntos desaparecen y queda la curva ideal
+        self.play(
+            FadeOut(dots_group), 
+            FadeOut(ghost_curve),
+            FadeOut(area),
+            Create(solid_curve),
+            solid_curve.animate.set_fill(GREEN, opacity=0.3)
+        )
+        self.wait(1)
+
+        # ==========================================
+        # 4. EL ZOOLÓGICO DE DISTRIBUCIONES
+        # ==========================================
         
-        self.play(FadeOut(dots), Create(curve))
-        self.play(curve.animate.set_fill(BLUE, opacity=0.3))
-        self.wait(2)
+        # Limpieza de textos anteriores
+        self.play(FadeOut(titulo_3), FadeOut(subtitulo_3))
+
+        t4 = Text("4. Zoo de Distribuciones", font_size=32).to_edge(UP)
+        st4 = Text("La forma depende de la naturaleza del fenómeno.", font_size=20, color=GRAY).next_to(t4, DOWN)
+        
+        self.play(FadeIn(t4), FadeIn(st4))
+        
+        # Eliminamos la curva verde anterior para empezar limpio el ciclo
+        if 'solid_curve' in locals():
+            self.remove(solid_curve) 
+
+        # --- A. DISTRIBUCIÓN UNIFORME ---
+        # 1. La Curva
+        curve_uni = ax.plot(lambda x: 0.7 if -2.5 < x < 2.5 else 0, color=BLUE)
+        curve_uni.set_fill(BLUE, opacity=0.3)
+        
+        # 2. La Ficha Técnica (Info)
+        lbl_uni = Text("Uniforme", font_size=28, color=BLUE).move_to(ax.c2p(-3, 0.8))
+        
+        # Usamos MathTex para la fórmula. La r al principio es vital (raw string).
+        info_uni = VGroup(
+            VGroup(
+                Text("", font_size=20), 
+                MathTex(r"f(x) = k", font_size=24, color=BLUE)
+            ).arrange(RIGHT, buff=0.2),
+            
+            VGroup(
+                Text("Ej.:", font_size=20), 
+                Text("Tirar un dado, Lotería", font_size=20, color=YELLOW)
+            ).arrange(RIGHT, buff=0.2)
+        ).arrange(DOWN, aligned_edge=LEFT).to_corner(UR).shift(DOWN * 1.5)
+        
+        # Animación
+        # Nota: Si solid_curve existe de la escena anterior, úsala en el primer argumento.
+        # Si no, usa FadeIn(curve_uni). Asumimos que solid_curve viene del paso 3.
+        self.play(
+            ReplacementTransform(solid_curve, curve_uni), 
+            Write(lbl_uni),
+            FadeIn(info_uni)
+        )
+        self.wait(4)
+
+        curve_exp_line = ax.plot(lambda x: np.exp(-x * 0.6), x_range=[0, 5], color=ORANGE)
+        
+        # B. El Área (El relleno suave)
+        # get_area calcula matemáticamente el polígono entre la curva y el eje X
+        curve_exp_area = ax.get_area(curve_exp_line, x_range=[0, 5], color=ORANGE, opacity=0.3)
+        
+        # C. Grupo (Para que actúen como un solo objeto en la animación)
+        # Este 'curve_exp' reemplaza al objeto único que tenías antes
+        curve_exp = VGroup(curve_exp_line, curve_exp_area)
+        
+        # 2. LA INFO (Ficha técnica con LaTeX)
+        lbl_exp = Text("Exponencial", font_size=28, color=ORANGE).move_to(ax.c2p(2.5, 0.8))
+        
+        info_exp = VGroup(
+            VGroup(
+                Text("Fórmula:", font_size=20), 
+                MathTex(r"f(x) = \lambda e^{-\lambda x}", font_size=24, color=ORANGE)
+            ).arrange(RIGHT, buff=0.2),
+            
+            VGroup(
+                Text("Ej:", font_size=20), 
+                Text("Tiempo espera bus / Radiactividad", font_size=20, color=YELLOW)
+            ).arrange(RIGHT, buff=0.2)
+        ).arrange(DOWN, aligned_edge=LEFT).to_corner(UR).shift(DOWN * 1.5)
+        
+        # 3. ANIMACIÓN
+        self.play(
+            ReplacementTransform(lbl_uni, lbl_exp),
+            ReplacementTransform(info_uni, info_exp),
+            # Transformamos la curva uniforme en el NUEVO GRUPO (Línea + Área)
+            ReplacementTransform(curve_uni, curve_exp)
+        )
+        self.wait(4)
+
+        # --- C. DISTRIBUCIÓN BIMODAL ---
+        # 1. La Curva
+        curve_bi = ax.plot(lambda x: 0.7*np.exp(-(x+2.5)**2) + 0.7*np.exp(-(x-2.5)**2), color=PURPLE)
+        curve_bi.set_fill(PURPLE, opacity=0.3)
+        
+        # 2. La Info
+        lbl_bi = Text("Bimodal", font_size=28, color=PURPLE).move_to(ax.c2p(0, 0.4))
+        
+        info_bi = VGroup(
+            VGroup(
+                Text("", font_size=20), 
+                MathTex(r"f(x) \approx N(\mu_1) + N(\mu_2)", font_size=24, color=PURPLE)
+            ).arrange(RIGHT, buff=0.2),
+            
+            VGroup(
+                Text("Ej.", font_size=20), 
+                Text("Población mixta", font_size=20, color=YELLOW)
+            ).arrange(RIGHT, buff=0.2)
+        ).arrange(DOWN, aligned_edge=LEFT).to_corner(UR).shift(DOWN * 1.5)
+        
+        # Animación
+        self.play(
+            ReplacementTransform(curve_exp, curve_bi), 
+            ReplacementTransform(lbl_exp, lbl_bi),
+            ReplacementTransform(info_exp, info_bi) # Corregido: transformamos info_uni -> info_bi si info_exp dio error
+        )
+
+        self.wait(4)
 
 # --- ACTO 3: EL BALANCÍN (MEDIA) (Sin cambios) ---
 class Acto3_Media(Scene):
