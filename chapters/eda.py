@@ -87,43 +87,26 @@ ACTOS = [
         "clase": "Acto3_Media",
         "titulo": "Acto 3: El Balancín (Tendencia Central)",
         "desc": textwrap.dedent("""
-            # ⚖️ Acto 3: El Mapa de la Curva (El Centro)
+            ### 1. El Punto de Equilibrio: La Media ($$\mu$$)
+                                
+            Imagina que tus datos no son números abstractos, sino objetos con peso físico colocados sobre una balanza. La **media aritmética** ($$\mu$$) es el punto exacto donde esa balanza se mantiene perfectamente horizontal. Matemáticamente, se define como la suma de todos los valores dividida por el número total de observaciones:
+            $$\mu = \\frac{\sum_{i=1}^{N} x_i}{N}$$
+            En la animación, vemos cómo un conjunto de datos simétricos encuentra su equilibrio de forma natural en el centro. Sin embargo, la media tiene una debilidad: es **extremadamente sensible**. Al introducir un **outlier** (un valor atípico muy lejano, como el punto rojo), el punto de equilibrio debe desplazarse drásticamente hacia ese extremo para compensar el "peso" extra y evitar que la balanza se vuelque. Esto nos enseña que la media, aunque útil, puede ser engañosa si nuestros datos tienen valores extremos.
             
-            Una vez tenemos la forma (la distribución), necesitamos números para describirla. La primera pregunta es: **¿Dónde está el centro?**
-
-            ### 1. La Media ($\mu$): El Punto de Equilibrio
-            Visualízalo como un balancín físico. La media es el punto exacto donde la barra se mantiene horizontal.
-            * **El Problema del Outlier:** En el video, añadimos un dato rojo muy lejano (un outlier).
-            * **La Reacción:** Para que el balancín no se vuelque, el punto de apoyo (la media) tuvo que desplazarse rápidamente hacia la derecha.
-            * **Lección:** La media es **muy sensible** a los valores extremos. Si Bill Gates entra en un bar, la "media" de riqueza sube a millones, pero nadie es más rico.
-
-            ### 2. La Mediana: La Cuchilla
-            Aunque no sale en la animación, la mediana es una cuchilla que corta el área en dos mitades iguales de masa (bolas).
-            * La mediana apenas se mueve con el outlier. Es una medida **robusta**.
-        """)
-    },
-    {
-        "clase": "Acto4_Dispersion",
-        "titulo": "Acto 4: La Respiración (Dispersión)",
-        "desc": textwrap.dedent("""
-            # 🌬️ Acto 4: La Incertidumbre (Dispersión)
+            ### 2. El Centro Ordenado: La Mediana ($$Me$$)
+                                
+            A diferencia de la media, que busca el equilibrio de pesos, la **mediana** busca el centro del orden. Si alineamos todos nuestros datos de menor a mayor, la mediana es el valor que ocupa la posición central, dividiendo al conjunto en dos mitades exactas: 50% de los datos quedan a su izquierda y 50% a su derecha. Su posición se determina por el índice:
+            $$Me = x_{\\frac{N+1}{2}}$$
+            Visualmente, la mediana actúa como una barrera que separa los datos "bajos" (rojos) de los "altos" (azules). Su gran fortaleza es la **robustez**: cuando añadimos el mismo outlier que desestabilizó la media, la mediana apenas se inmuta. Simplemente se desplaza un lugar en la fila ordenada, ignorando qué tan lejos está el valor extremo. Por eso, la mediana es el estadístico preferido para datos asimétricos, como los salarios o los precios de vivienda.
             
-            Saber el centro no es suficiente. Necesitamos saber cuánto confiamos en ese centro. Aquí entra la **Desviación Estándar ($\sigma$)**.
-
-            ### La Metáfora de la Respiración
-            En la animación vemos la curva "respirar", haciéndose más ancha o más estrecha.
-
-            #### 🟢 Curva Estrecha ($\sigma$ bajo)
-            * La curva es alta y delgada, como una aguja.
-            * Significa que todos los datos están muy pegados a la media.
-            * **Interpretación:** Tenemos mucha **precisión** y poca incertidumbre.
-
-            #### 🟢 Curva Ancha ($\sigma$ alto)
-            * La curva se aplasta como una colina suave.
-            * Los datos están muy dispersos, lejos del centro.
-            * **Interpretación:** Hay mucho **ruido** o variabilidad. El dato promedio es menos representativo.
-            
-            > **En Machine Learning:** Un modelo con alta varianza (curva ancha) suele ser inestable. Entender la dispersión es clave para calcular el error de tus predicciones.
+            ### 3. La Medida de la Incertidumbre: La Desviación Estándar ($$\sigma$$)
+                                
+            Conocer el centro no es suficiente; necesitamos saber qué tan dispersos están los datos alrededor de él. La **desviación estándar** ($$\sigma$$) es, en esencia, la distancia promedio de cada punto respecto a la media. Su fórmula calcula la raíz cuadrada del promedio de las distancias al cuadrado:
+            $$\sigma = \sqrt{\\frac{\sum_{i=1}^{N} (x_i - \mu)^2}{N}}$$
+            En la animación, representamos esto con líneas naranjas que conectan cada bola con el centro.
+            * **Poca dispersión ($$\sigma$$ baja):** Las bolas están agrupadas cerca del centro, las líneas naranjas son cortas. Esto indica alta precisión y consistencia en los datos.
+            * **Mucha dispersión ($$\sigma$$ alta):** Las bolas están muy separadas, generando líneas largas. Esto señala una mayor variabilidad e incertidumbre.
+            > **Finalmente:** Cuando dejamos de ver puntos individuales y pasamos a tener miles de datos, estas propiedades físicas (centro y dispersión) moldean la **distribución continua** que emerge, transformando el histograma discreto en la suave curva de densidad que estudiamos en estadística teórica.
         """)
     }
 ]

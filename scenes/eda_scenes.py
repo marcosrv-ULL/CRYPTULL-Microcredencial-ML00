@@ -454,38 +454,373 @@ class Acto2_Distribucion(Scene):
 # --- ACTO 3: EL BALANCÍN (MEDIA) (Sin cambios) ---
 class Acto3_Media(Scene):
     def construct(self):
-        # Configuración inicial
-        linea = NumberLine(x_range=[-5, 15, 1], length=12, include_numbers=True)
-        linea.shift(UP * 0.5)
+
+        number_line = NumberLine(
+            x_range=[0, 16, 1], 
+            length=12, 
+            include_numbers=True, 
+            font_size=20
+        ).shift(DOWN * 1)
         
-        # Datos iniciales (simétricos)
-        datos = [4, 5, 6]
-        bolas = VGroup(*[Dot(linea.n2p(x), color=BLUE, radius=0.2).shift(UP*0.3) for x in datos])
+        self.play(Create(number_line))
+
+        # ==========================================
+        # 1. LA MEDIA (EL EQUILIBRIO)
+        # ==========================================
         
-        # El triángulo (Media)
-        media_val = np.mean(datos)
-        fulcrum = Triangle(color=WHITE, fill_opacity=1).scale(0.2).rotate(PI)
-        fulcrum.move_to(linea.n2p(media_val) + DOWN*0.3)
-        lbl_mu = Text("Media").next_to(fulcrum, DOWN)
+        titulo_1 = Text("1. La Media (El Equilibrio)", font_size=36).to_edge(UP)
+        # Fórmula con LaTeX
+        formula_media = MathTex(r"\mu = \frac{\sum x_i}{N}", font_size=32, color=YELLOW).next_to(titulo_1, DOWN)
         
-        self.add(linea, bolas, fulcrum, lbl_mu)
+        self.play(Write(titulo_1), FadeIn(formula_media))
+
+        # A. Datos Iniciales (Simétricos y compactos)
+        datos = [6, 7, 8, 9, 10] # Media = 8
+        bolas = VGroup(*[Dot(number_line.n2p(x), color=BLUE, radius=0.15).shift(UP*0.5) for x in datos])
+        
+        self.play(LaggedStart(*[FadeIn(b, shift=DOWN) for b in bolas], lag_ratio=0.1))
+        
+        # B. El Punto de Apoyo (Fulcrum) en la media (8)
+        mean_val = np.mean(datos)
+        fulcrum = Triangle(color=YELLOW, fill_opacity=1).scale(0.2).rotate(PI)
+        fulcrum.move_to(number_line.n2p(mean_val) + DOWN*0.2) # Debajo de la línea
+        
+        lbl_mu = MathTex(r"\mu", color=YELLOW).next_to(fulcrum, DOWN)
+        
+        self.play(FadeIn(fulcrum), Write(lbl_mu))
         self.wait(1)
+
+        # C. El Outlier (El desequilibrio)
+        # Añadimos un dato muy lejano (15)
+        outlier_val = 15
+        outlier = Dot(number_line.n2p(outlier_val), color=RED, radius=0.15).shift(UP*0.5)
         
-        # Aparece el Outlier
-        outlier = Dot(linea.n2p(14), color=RED, radius=0.25).shift(UP*0.3)
-        self.play(FadeIn(outlier))
+        # Animación de entrada impactante
+        self.play(FadeIn(outlier, scale=0.5))
+        self.play(outlier.animate.set_color(RED)) # Destacar que es diferente
         
-        # Cálculo nueva media
-        nuevos_datos = datos + [14]
-        nueva_media = np.mean(nuevos_datos)
+        # Cálculo de la nueva media
+        nuevos_datos = datos + [outlier_val]
+        nueva_media = np.mean(nuevos_datos) # (40 + 15) / 6 = 9.16
         
-        # Animación del re-equilibrio
+        # D. La Reacción Física
+        # Texto explicativo
+        txt_sensible = Text("¡La media es sensible!", font_size=24, color=RED).next_to(number_line, UP).shift(UP*1.5)
+        
         self.play(
-            fulcrum.animate.move_to(linea.n2p(nueva_media) + DOWN*0.3),
-            lbl_mu.animate.next_to(linea.n2p(nueva_media) + DOWN*0.3, DOWN),
+            fulcrum.animate.move_to(number_line.n2p(nueva_media) + DOWN*0.2),
+            lbl_mu.animate.next_to(number_line.n2p(nueva_media) + DOWN*0.2, DOWN),
+            Write(txt_sensible),
             run_time=2
         )
         self.wait(2)
+
+        # ==========================================
+        # 2. LA MEDIANA (EL ORDEN)
+        # ==========================================
+        
+        # Limpieza: Quitamos todo lo específico de la media
+        self.play(
+            FadeOut(fulcrum), FadeOut(lbl_mu), FadeOut(txt_sensible), 
+            FadeOut(formula_media), FadeOut(titulo_1), FadeOut(outlier)
+        )
+        
+        # Título Mediana
+        titulo_2 = Text("2. La Mediana (El Centro)", font_size=36).to_edge(UP)
+        formula_mediana = MathTex(r"Me = x_{(n+1)/2}", font_size=32, color=GREEN).next_to(titulo_2, DOWN)
+        
+        self.play(Write(titulo_2), FadeIn(formula_mediana))
+        
+        # A. Colorear las bolas existentes (volvemos a los 5 datos originales)
+        # Datos: 6, 7, 8, 9, 10. Mediana = 8 (Tercer elemento)
+        
+        # Parte Izquierda (Rojo)
+        grupo_izq = VGroup(bolas[0], bolas[1]) # 6, 7
+        # Parte Derecha (Azul)
+        grupo_der = VGroup(bolas[3], bolas[4]) # 9, 10
+        # Mediana (Verde)
+        bola_mediana = bolas[2] # 8
+        
+        self.play(
+            grupo_izq.animate.set_color(RED),
+            grupo_der.animate.set_color(BLUE),
+            bola_mediana.animate.set_color(GREEN).scale(1.5)
+        )
+        
+        lbl_me = Text("Mediana", font_size=20, color=GREEN).next_to(bola_mediana, UP)
+        self.play(FadeIn(lbl_me))
+        self.wait(1)
+        
+        # B. Añadir el Outlier de nuevo
+        # Ahora tenemos 6 datos: 6, 7, 8, 9, 10, 15
+        # La mediana cae entre 8 y 9 (8.5).
+        # Visualmente, la mediana "se mueve" al hueco entre 8 y 9.
+        
+        self.play(FadeIn(outlier)) # Vuelve el outlier rojo (es parte del grupo derecho ahora)
+        
+        # Nueva coloración lógica
+        # Izquierda: 6, 7, 8 (3 bolas) -> Rojos
+        # Derecha: 9, 10, 15 (3 bolas) -> Azules
+        # Mediana: En medio de 8 y 9
+        
+        # Flecha indicando la nueva mediana
+        flecha_mediana = Arrow(start=UP, end=DOWN, color=GREEN).next_to(number_line.n2p(8.5), UP)
+        lbl_me_new = Text("Nueva Mediana", font_size=20, color=GREEN).next_to(flecha_mediana, UP)
+
+        self.play(
+            bola_mediana.animate.set_color(RED).scale(1/1.5), # El 8 pasa a ser izquierda
+            bolas[3].animate.set_color(BLUE), # El 9 es derecha
+            outlier.animate.set_color(BLUE),  # El 15 es derecha
+            FadeOut(lbl_me),
+            GrowArrow(flecha_mediana),
+            Write(lbl_me_new)
+        )
+        
+        txt_robusta = Text("¡Apenas se mueve!", font_size=24, color=GREEN).move_to(UP*2)
+        self.play(Write(txt_robusta))
+        self.wait(2)
+
+        # ==========================================
+        # 3. DESVIACIÓN ESTÁNDAR (LA DISTANCIA)
+        # ==========================================
+        
+        # Limpieza
+        self.play(
+            FadeOut(titulo_2), FadeOut(formula_mediana), FadeOut(grupo_izq), FadeOut(grupo_der), 
+            FadeOut(bola_mediana), FadeOut(outlier), FadeOut(flecha_mediana), FadeOut(lbl_me_new), FadeOut(txt_robusta)
+        )
+
+        titulo_3 = Text("3. Desviación Estándar (Dispersión)", font_size=36).to_edge(UP)
+        formula_sigma = MathTex(r"\sigma = \sqrt{\frac{\sum(x_i - \mu)^2}{N}}", font_size=32, color=ORANGE).next_to(titulo_3, DOWN)
+        
+        self.play(Write(titulo_3), FadeIn(formula_sigma))
+        
+        # A. Caso 1: Poca Dispersión (Datos juntos)
+        datos_baja = [7, 8, 9] # Media 8
+        bolas_baja = VGroup(*[Dot(number_line.n2p(x), color=YELLOW, radius=0.15).shift(UP*0.5) for x in datos_baja])
+        
+        self.play(FadeIn(bolas_baja))
+        
+        # Dibujar líneas de distancia a la media (8)
+        lineas = VGroup()
+        for x in datos_baja:
+            l = Line(number_line.n2p(x)+UP*0.5, number_line.n2p(8)+UP*0.5, color=ORANGE)
+            lineas.add(l)
+            
+        self.play(Create(lineas))
+        lbl_baja = Text("Poca distancia = Sigma baja", font_size=24, color=ORANGE).next_to(bolas_baja, UP, buff=0.5)
+        self.play(Write(lbl_baja))
+        self.wait(2)
+        
+        # B. Caso 2: Mucha Dispersión (Datos lejos)
+        self.play(FadeOut(bolas_baja), FadeOut(lineas), FadeOut(lbl_baja))
+        
+        datos_alta = [4, 8, 12] # Media 8
+        bolas_alta = VGroup(*[Dot(number_line.n2p(x), color=YELLOW, radius=0.15).shift(UP*0.5) for x in datos_alta])
+        
+        self.play(FadeIn(bolas_alta))
+        
+        lineas_alta = VGroup()
+        for x in datos_alta:
+            l = Line(number_line.n2p(x)+UP*0.5, number_line.n2p(8)+UP*0.5, color=ORANGE)
+            lineas_alta.add(l)
+            
+        self.play(Create(lineas_alta))
+        lbl_alta = Text("Mucha distancia = Sigma alta", font_size=24, color=ORANGE).next_to(bolas_alta, UP, buff=1)
+        self.play(Write(lbl_alta))
+        self.wait(2)
+
+        # ==========================================
+        # 4. TRANSICIÓN A LA DISTRIBUCIÓN
+        # ==========================================
+        
+        self.play(FadeOut(titulo_3), FadeOut(formula_sigma), FadeOut(bolas_alta), FadeOut(lineas_alta), FadeOut(lbl_alta), FadeOut(number_line))
+        
+        txt_final = Text("Cuando tenemos miles de bolas...", font_size=32).move_to(ORIGIN)
+        self.play(Write(txt_final))
+        self.wait(1)
+        
+        # Morphing visual a la curva (simulado)
+        # Dibujamos ejes y curva rápidamente
+        ax_small = Axes(x_range=[-3, 3], y_range=[0, 1], y_length=3, x_length=6).shift(DOWN*0.5)
+        curve_small = ax_small.plot(lambda x: np.exp(-x**2/2), color=BLUE)
+        
+        self.play(
+            Transform(txt_final, Text("...emerge la Distribución", font_size=32).to_edge(UP)),
+            Create(ax_small), 
+            Create(curve_small)
+        )
+        self.wait(2)
+
+        self.play(
+            FadeOut(txt_final),
+            FadeOut(curve_small)
+        )
+
+        # --- CONFIGURACIÓN DE EJES ---
+        # Eje Y reducido para maximizar altura
+        ax = Axes(x_range=[-5, 7], y_range=[0, 1], y_length=5, axis_config={"include_tip": False})
+        
+        # Función auxiliar para la normal visualmente escalada
+        VISUAL_SCALE = 2.0 
+        def get_pdf(x, mu=0, sigma=1):
+            return (np.exp(-0.5 * ((x - mu) / sigma)**2) / (sigma * np.sqrt(2*np.pi))) * VISUAL_SCALE
+
+        # ==========================================
+        # 1. TENDENCIA CENTRAL: LA MEDIA (EL BALANCÍN)
+        # ==========================================
+        
+        titulo_1 = Text("Ahora en nuestra distribución la media:", font_size=36).to_edge(UP)
+        formula_media = MathTex(r"\mu = \frac{\sum x_i}{N}", font_size=32, color=YELLOW).next_to(titulo_1, DOWN)
+        
+        self.play(Write(titulo_1), FadeIn(formula_media))
+        self.play(Transform(ax_small, ax))
+
+        # A. La Distribución Simétrica (El "Peso")
+        curve = ax.plot(lambda x: get_pdf(x), color=BLUE)
+        area = ax.get_area(curve, color=BLUE, opacity=0.3)
+        self.play(Create(curve), FadeIn(area))
+
+        # B. El Punto de Apoyo (Fulcrum)
+        fulcrum = Triangle(color=YELLOW, fill_opacity=1).scale(0.2).rotate(PI)
+        fulcrum.move_to(ax.c2p(0, -0.1)) # Justo debajo del 0
+        
+        lbl_fulcrum = Text("Punto de Equilibrio", font_size=20, color=YELLOW).next_to(fulcrum, DOWN)
+        
+        self.play(FadeIn(fulcrum), Write(lbl_fulcrum))
+        self.wait(1)
+
+        # C. El Evento Disruptivo (El Outlier)
+        # Una bola roja pesada cae lejos a la derecha
+        outlier_val = 5
+        outlier = Dot(ax.c2p(outlier_val, 1), color=RED, radius=0.15)
+        lbl_outlier = Text("Outlier (Dato extremo)", font_size=20, color=RED).next_to(outlier, UP)
+        
+        self.play(FadeIn(outlier), Write(lbl_outlier))
+        self.play(outlier.animate.move_to(ax.c2p(outlier_val, 0)), rate_func=rate_functions.ease_out_bounce)
+        
+        # D. La Reacción Física
+        # Texto de advertencia
+        txt_tilt = Text("¡Desequilibrio!", font_size=24, color=RED).move_to(ax.c2p(2.5, 0.5))
+        self.play(Write(txt_tilt))
+        
+        # Para recuperar el equilibrio, la media debe desplazarse hacia el peso
+        # Simulamos visualmente el desplazamiento (exagerado para efecto didáctico)
+        new_mean_x = 1.5 
+        
+        self.play(
+            fulcrum.animate.move_to(ax.c2p(new_mean_x, -0.1)),
+            lbl_fulcrum.animate.next_to(ax.c2p(new_mean_x, -0.1), DOWN),
+            FadeOut(txt_tilt)
+        )
+        
+        txt_sensitive = Text("La Media es SENSIBLE", font_size=24, color=YELLOW).next_to(curve, UP).shift(RIGHT*2)
+        self.play(Write(txt_sensitive))
+        self.wait(2)
+
+        # ==========================================
+        # 2. TENDENCIA CENTRAL: LA MEDIANA (LA CUCHILLA)
+        # ==========================================
+        
+        # Limpieza parcial: Quitamos fulcrum y textos de media, dejamos curva y outlier
+        self.play(
+            FadeOut(fulcrum), FadeOut(lbl_fulcrum), FadeOut(txt_sensitive), FadeOut(formula_media),
+            FadeOut(titulo_1)
+        )
+
+        titulo_2 = Text("La Cuchilla (La Mediana)", font_size=36).to_edge(UP)
+        formula_mediana = MathTex(r"Mediana = 50\% \text{ Área}", font_size=32, color=GREEN).next_to(titulo_2, DOWN)
+        
+        self.play(Write(titulo_2), FadeIn(formula_mediana))
+
+        # A. La Cuchilla
+        # La mediana en una normal pura está en 0. 
+        # Con el outlier en 5, la mediana apenas se mueve (quizás a 0.1)
+        knife = DashedLine(ax.c2p(0.1, 0), ax.c2p(0.1, 1), color=GREEN, stroke_width=5)
+        lbl_knife = Text("Corta 50/50", font_size=20, color=GREEN).next_to(knife, UP)
+        
+        self.play(Create(knife), Write(lbl_knife))
+        self.wait(1)
+
+        # B. Comparación
+        # Mostramos dónde quedó la media (fantasma)
+        ghost_mean = Triangle(color=YELLOW, fill_opacity=0.5).scale(0.2).rotate(PI).move_to(ax.c2p(new_mean_x, -0.1))
+        lbl_ghost = Text("Media", font_size=16, color=YELLOW).next_to(ghost_mean, DOWN)
+        
+        self.play(FadeIn(ghost_mean), FadeIn(lbl_ghost))
+        
+        txt_robust = Text("La Mediana es ROBUSTA", font_size=24, color=GREEN).move_to(ax.c2p(-3, 0.5))
+        self.play(Write(txt_robust))
+        self.wait(3)
+
+        # ==========================================
+        # 3. DISPERSIÓN: LA RESPIRACIÓN (SIGMA)
+        # ==========================================
+        
+        # Limpieza Total
+        self.play(
+            FadeOut(titulo_2), FadeOut(formula_mediana), FadeOut(knife), FadeOut(lbl_knife),
+            FadeOut(ghost_mean), FadeOut(lbl_ghost), FadeOut(txt_robust),
+            FadeOut(outlier), FadeOut(lbl_outlier), FadeOut(curve), FadeOut(area)
+        )
+
+        titulo_3 = Text("La distribución 'respira' según la desviación", font_size=36).to_edge(UP)
+        # Fórmula de sigma visual
+        formula_sigma = MathTex(r"\sigma \to \text{Anchura}", font_size=32, color=ORANGE).next_to(titulo_3, DOWN)
+        
+        self.play(Write(titulo_3), FadeIn(formula_sigma))
+
+        # A. Curva Estándar
+        curve_base = ax.plot(lambda x: get_pdf(x, sigma=1), color=BLUE)
+        area_base = ax.get_area(curve_base, color=BLUE, opacity=0.3)
+        self.play(Create(curve_base), FadeIn(area_base))
+        
+        # Dibujar Sigma (Línea desde el centro al punto de inflexión)
+        # En una normal N(0,1), el punto de inflexión está en x=1
+        center_line = DashedLine(ax.c2p(0,0), ax.c2p(0, get_pdf(0)), color=WHITE, stroke_opacity=0.5)
+        sigma_line = Arrow(ax.c2p(0, get_pdf(1)), ax.c2p(1, get_pdf(1)), color=ORANGE, buff=0)
+        lbl_sigma = MathTex(r"\sigma = 1", color=ORANGE, font_size=24).next_to(sigma_line, UP)
+        
+        self.play(Create(center_line), GrowArrow(sigma_line), Write(lbl_sigma))
+        self.wait(1)
+
+        # ESTADO 1: INHALAR (Preciso / Estrecho)
+        curve_narrow = ax.plot(lambda x: get_pdf(x, sigma=0.5), color=BLUE)
+        area_narrow = ax.get_area(curve_narrow, color=BLUE, opacity=0.3)
+        # Flecha corta
+        arrow_narrow = Arrow(ax.c2p(0, get_pdf(0.5, sigma=0.5)), ax.c2p(0.5, get_pdf(0.5, sigma=0.5)), color=ORANGE, buff=0)
+        lbl_narrow = MathTex(r"\sigma = 0.5 \text{ (Preciso)}", color=ORANGE, font_size=24).next_to(arrow_narrow, RIGHT)
+
+        # ESTADO 2: EXHALAR (Ruidoso / Ancho)
+        curve_wide = ax.plot(lambda x: get_pdf(x, sigma=2.0), color=BLUE)
+        area_wide = ax.get_area(curve_wide, color=BLUE, opacity=0.3)
+        # Flecha larga
+        arrow_wide = Arrow(ax.c2p(0, get_pdf(2, sigma=2)), ax.c2p(2, get_pdf(2, sigma=2)), color=ORANGE, buff=0)
+        lbl_wide = MathTex(r"\sigma = 2.0 \text{ (Ruidoso)}", color=ORANGE, font_size=24).next_to(arrow_wide, UP)
+
+        # --- BUCLE DE RESPIRACIÓN (5 VECES) ---
+        for i in range(5):
+            # 1. Inhalar (Se hace estrecha)
+            self.play(
+                Transform(curve_base, curve_narrow),
+                Transform(area_base, area_narrow),
+                Transform(sigma_line, arrow_narrow),
+                Transform(lbl_sigma, lbl_narrow),
+                run_time=1.5,
+                rate_func=rate_functions.ease_in_out_sine # Movimiento suave
+            )
+            
+            # 2. Exhalar (Se aplasta)
+            self.play(
+                Transform(curve_base, curve_wide),
+                Transform(area_base, area_wide),
+                Transform(sigma_line, arrow_wide),
+                Transform(lbl_sigma, lbl_wide),
+                run_time=1.5,
+                rate_func=rate_functions.ease_in_out_sine # Movimiento suave
+            )
+            
+        self.wait(1)
 
 # --- ACTO 4: DISPERSIÓN (Sin cambios) ---
 class Acto4_Dispersion(Scene):
